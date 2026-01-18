@@ -9,46 +9,45 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+if (!process.env.GEMINI_API_KEY) {
+  console.error("❌ GEMINI_API_KEY missing");
+}
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-/* ================= ROOT CHECK ================= */
+/* ================= HEALTH CHECK ================= */
 app.get("/", (req, res) => {
   res.send("AI backend running ✅");
+});
+
+/* ================= TEST GEMINI ================= */
+app.get("/test", async (req, res) => {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const result = await model.generateContent("Say OK");
+    res.json({ reply: result.response.text() });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 /* ================= GENERATE QUESTIONS ================= */
 app.post("/generate-questions", async (req, res) => {
   try {
-    const { syllabusText, subjectName } = req.body;
+    const { syllabusText } = req.body;
 
-    if (!syllabusText || syllabusText.length < 50) {
-      return res.status(400).json({ error: "Invalid syllabus text" });
+    if (!syllabusText || syllabusText.length < 100) {
+      return res.status(400).json({ error: "Syllabus too short" });
     }
 
-    // ✅ ONLY SUPPORTED MODEL
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.0-pro"
-    });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
     const prompt = `
-You are an Anna University question paper setter.
+Create Anna University questions from this syllabus.
 
-Subject: ${subjectName}
+Return STRICT JSON only.
 
-From the syllabus below, generate:
-- PART A: 10 short questions (2 marks)
-- PART B: 5 questions with (a) and (b) (13 marks)
-- PART C: 1 long question (15 marks)
-
-Rules:
-- Do NOT include page numbers, unit numbers, or headings
-- Use only syllabus concepts
-- Output STRICT JSON only
-
-Syllabus:
-${syllabusText}
-
-JSON FORMAT:
 {
   "partA": ["Q1", "..."],
   "partB": [
@@ -56,26 +55,24 @@ JSON FORMAT:
   ],
   "partC": ["Question"]
 }
+
+Syllabus:
+${syllabusText}
 `;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 
-    const jsonStart = text.indexOf("{");
-    const jsonEnd = text.lastIndexOf("}");
-    const cleanJson = text.substring(jsonStart, jsonEnd + 1);
+    const json = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+    res.json(json);
 
-    const data = JSON.parse(cleanJson);
-
-    res.json(data);
-
-  } catch (err) {
-    console.error("Gemini API Error:", err);
-    res.status(500).json({ error: "Failed to generate questions" });
+  } catch (e) {
+    console.error("❌ Gemini error:", e);
+    res.status(500).json({ error: "Gemini failed" });
   }
 });
 
-/* ================= START SERVER ================= */
+/* ================= START ================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Backend running on port", PORT);
