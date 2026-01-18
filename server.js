@@ -9,22 +9,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-if (!process.env.GEMINI_API_KEY) {
-  console.error("❌ GEMINI_API_KEY missing");
-}
+console.log("Gemini key loaded:", !!process.env.GEMINI_API_KEY);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-/* ================= HEALTH CHECK ================= */
+/* ================= HEALTH ================= */
 app.get("/", (req, res) => {
   res.send("AI backend running ✅");
 });
 
-/* ================= TEST GEMINI ================= */
+/* ================= TEST ================= */
 app.get("/test", async (req, res) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-    const result = await model.generateContent("Say OK");
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const result = await model.generateContent("Reply only with OK");
     res.json({ reply: result.response.text() });
   } catch (e) {
     console.error(e);
@@ -41,19 +39,19 @@ app.post("/generate-questions", async (req, res) => {
       return res.status(400).json({ error: "Syllabus too short" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `
-Create Anna University questions from this syllabus.
+Generate Anna University question paper.
 
-Return STRICT JSON only.
+Return STRICT JSON ONLY:
 
 {
-  "partA": ["Q1", "..."],
+  "partA": ["10 short questions"],
   "partB": [
     { "a": "Question", "b": "Question" }
   ],
-  "partC": ["Question"]
+  "partC": ["1 long question"]
 }
 
 Syllabus:
@@ -66,8 +64,8 @@ ${syllabusText}
     const json = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
     res.json(json);
 
-  } catch (e) {
-    console.error("❌ Gemini error:", e);
+  } catch (err) {
+    console.error("Gemini error:", err);
     res.status(500).json({ error: "Gemini failed" });
   }
 });
