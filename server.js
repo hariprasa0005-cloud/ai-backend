@@ -1,109 +1,99 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+dotenv.config();
+
 const app = express();
+app.use(cors());
+app.use(express.json());
 
-/* ===============================
-   MIDDLEWARE
-================================ */
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
-}));
-
-app.use(express.json({ limit: "2mb" }));
-
-/* ===============================
-   GEMINI INIT
-================================ */
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-/* ===============================
+/* ======================================================
    HEALTH CHECK
-================================ */
+====================================================== */
+
 app.get("/", (req, res) => {
-  res.send("Gemini AI backend running ✅");
+  res.send("AI backend running ✅");
 });
 
-/* ===============================
-   GENERATE QUESTIONS API
-================================ */
+/* ======================================================
+   GENERATE QUESTIONS (GEMINI)
+====================================================== */
+
 app.post("/generate-questions", async (req, res) => {
   try {
     const { syllabusText, subjectName } = req.body;
 
-    if (!syllabusText || syllabusText.length < 50) {
-      return res.status(400).json({
-        error: "Invalid or empty syllabus text"
-      });
+    if (!syllabusText) {
+      return res.status(400).json({ error: "No syllabus text provided" });
     }
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash"
+    });
 
     const prompt = `
 You are an Anna University question paper setter.
 
-Create a question paper STRICTLY from the syllabus given.
-
-Return ONLY valid JSON in this exact format:
-{
-  "partA": ["question1", "question2", "..."],
-  "partB": [
-    { "a": "question", "b": "question" }
-  ],
-  "partC": ["question"]
-}
-
-Rules:
-- Part A: 10 short answer questions (2 marks each)
-- Part B: 5 either-or questions (13 marks each)
-- Part C: 1 long answer question (15 marks)
-- Academic exam language
-- Do NOT copy syllabus sentences directly
-- No unit numbers
-- No page numbers
-
 Subject: ${subjectName}
+
+STRICT RULES:
+- Use ONLY the given syllabus text
+- Ignore page numbers, headers, footers
+- No hallucination
+- No extra topics
+- Academic exam language
 
 SYLLABUS:
 ${syllabusText}
+
+OUTPUT FORMAT (JSON ONLY):
+
+{
+  "partA": [
+    "Question",
+    "Question"
+  ],
+  "partB": [
+    { "a": "Question", "b": "Question" }
+  ],
+  "partC": [
+    "Question"
+  ]
+}
+
+Generate:
+- Part A: 10 very short 2-mark questions
+- Part B: 5 either-or 13-mark questions
+- Part C: 1 long 15-mark question
 `;
 
-    /* ✅ CORRECT MODEL */
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.0-pro"
-    });
-
     const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const text = result.response.text();
 
-    /* CLEAN JSON */
-    const cleanJson = responseText
-      .replace(/```json/gi, "")
-      .replace(/```/g, "")
-      .trim();
+    // Extract JSON safely
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}");
 
-    const parsed = JSON.parse(cleanJson);
+    const jsonString = text.substring(jsonStart, jsonEnd + 1);
+    const questions = JSON.parse(jsonString);
 
-    /* BASIC VALIDATION */
-    if (!parsed.partA || !parsed.partB || !parsed.partC) {
-      throw new Error("Invalid AI response format");
-    }
+    res.json(questions);
 
-    res.json(parsed);
-
-  } catch (err) {
-    console.error("❌ Gemini API Error:", err.message);
-    res.status(500).json({
-      error: "Question generation failed"
-    });
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    res.status(500).json({ error: "Gemini API failed" });
   }
 });
 
-/* ===============================
+/* ======================================================
    START SERVER
-================================ */
+====================================================== */
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Gemini backend running on port ${PORT}`);
+  console.log(`Backend running on port ${PORT}`);
 });
