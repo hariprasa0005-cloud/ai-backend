@@ -11,28 +11,23 @@ app.use(express.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-/* ======================================================
-   HEALTH CHECK
-====================================================== */
-
+/* ================= ROOT CHECK ================= */
 app.get("/", (req, res) => {
   res.send("AI backend running ✅");
 });
 
-/* ======================================================
-   GENERATE QUESTIONS (GEMINI)
-====================================================== */
-
+/* ================= GENERATE QUESTIONS ================= */
 app.post("/generate-questions", async (req, res) => {
   try {
     const { syllabusText, subjectName } = req.body;
 
-    if (!syllabusText) {
-      return res.status(400).json({ error: "No syllabus text provided" });
+    if (!syllabusText || syllabusText.length < 50) {
+      return res.status(400).json({ error: "Invalid syllabus text" });
     }
 
+    // ✅ ONLY SUPPORTED MODEL
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash"
+      model: "gemini-1.0-pro"
     });
 
     const prompt = `
@@ -40,60 +35,48 @@ You are an Anna University question paper setter.
 
 Subject: ${subjectName}
 
-STRICT RULES:
-- Use ONLY the given syllabus text
-- Ignore page numbers, headers, footers
-- No hallucination
-- No extra topics
-- Academic exam language
+From the syllabus below, generate:
+- PART A: 10 short questions (2 marks)
+- PART B: 5 questions with (a) and (b) (13 marks)
+- PART C: 1 long question (15 marks)
 
-SYLLABUS:
+Rules:
+- Do NOT include page numbers, unit numbers, or headings
+- Use only syllabus concepts
+- Output STRICT JSON only
+
+Syllabus:
 ${syllabusText}
 
-OUTPUT FORMAT (JSON ONLY):
-
+JSON FORMAT:
 {
-  "partA": [
-    "Question",
-    "Question"
-  ],
+  "partA": ["Q1", "..."],
   "partB": [
     { "a": "Question", "b": "Question" }
   ],
-  "partC": [
-    "Question"
-  ]
+  "partC": ["Question"]
 }
-
-Generate:
-- Part A: 10 very short 2-mark questions
-- Part B: 5 either-or 13-mark questions
-- Part C: 1 long 15-mark question
 `;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 
-    // Extract JSON safely
     const jsonStart = text.indexOf("{");
     const jsonEnd = text.lastIndexOf("}");
+    const cleanJson = text.substring(jsonStart, jsonEnd + 1);
 
-    const jsonString = text.substring(jsonStart, jsonEnd + 1);
-    const questions = JSON.parse(jsonString);
+    const data = JSON.parse(cleanJson);
 
-    res.json(questions);
+    res.json(data);
 
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    res.status(500).json({ error: "Gemini API failed" });
+  } catch (err) {
+    console.error("Gemini API Error:", err);
+    res.status(500).json({ error: "Failed to generate questions" });
   }
 });
 
-/* ======================================================
-   START SERVER
-====================================================== */
-
+/* ================= START SERVER ================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+  console.log("Backend running on port", PORT);
 });
