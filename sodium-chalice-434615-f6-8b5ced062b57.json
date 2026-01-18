@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "sodium-chalice-434615-f6",
+  "private_key_id": "8b5ced062b57b7c10e2cfbe350d95b069a1bff3b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDOv/2DfBFmGlfp\nk/DScpWsfUSB0c7cO+SQ8tIqKyInx1w3899gilTNso5oglbOLmqxGStECnZ8xqDy\nb2i2O0Cv3kee5+uAD0AtBnBSshKD8ACs5SOv/8r5Xhxj1Woq/XdlSk7RXZbW0eQ+\nmphQlEeQQc0/ubUj7meYoNAH9Rl/PNH95yBLOaRf7afITCf4F1B4HQSLADXLOV1e\nbfC+VzNpBcLQZayyFmbCbAAhAG8GD6XWicM6pmgjhzsgYRecv+CFVTPe8jxoZlrn\ny+6tgNd7Gwstv14BQSzd39OmguDuG0wpImOA7lWP6K2zIHfLQFQYflxHOmCDYNTR\n61ATt2XRAgMBAAECggEAAQSdMdoMPeJdH3Q2iEEllblYlOkP3MuNgKppa+kiQtIU\n+3a/piDx2CdybKpQbuh3zWwJzgAQY36yfGJQpvqoti6UHLPlcXZ7XIPLgGS9eZlw\nPDaB0/qG9dTHgAHx6WJ6uLl1pOTe+sTPnACBeOTm0bUfo4CXFz7m+XxSBrZnjAki\nEHArpl5FP6CM6nd8LjXWrtY6xLxxBnOV+Jw+0+7An0H9gSHqOdhhHpa82ps1T2dx\niaZRSkJ+O/cAumG3BdDilgxejYyzVdhHIPcwGB4+bz3bt9106AloPi0tkAvxE5NK\ndDethRBJXsDjasPrUQ4e9WjNp3IxR1qhFdjSC9teDwKBgQDt7u0TlzjSmZf7ixAC\nkVHvse/bDVwdc/Br9CdOP6PwHOJwLntTyUPfqwKgoWltm6JapfgwNLNfxB7tQPoI\nfnMcFpwA+AEf1JvfygKkdD6AMDNbrQNB2IAVIXIjHTm+lymuiQYcnOd7qIRhzJYO\nmprMwV+l7cAg8yHlu0nC3VrsZwKBgQDecufkc6ZeglleAWs7JEbZ2ihl435dSOrW\nw1nhvSYraSnHT1EdC+Hd0zihTtTe0VsDt9zoKb2l4JuOsrSPxKZox3NOu20eDHFB\nP/bv3H3MFCwuBEjxzUZ2tTFeA0rwvpNY/3DQVn7uVuJgU0YzbJc8+8LgWwb2EP4/\njG60vKg5BwKBgEr981spXo+COZTez7z/cIPL4X15SH8/+5cK7RiMlm8nq3cQL27J\nEMt+auWV+lTBqPpJNWB8O80DU3wT7rqeoElKFwF3KWOO71IpqYuL1+cvSgCrF0u5\noSUH1aGbpIedvVV1eqeqDIu9IXxxrxoLQJ8ok60IsnWwLA7saOMyQWYhAoGAH3U4\nfgIs4OimIrkopPB4ZI6Jb/8/+4k4TK7LozTQlQsGMX1yBx2LD4ezVnyDdg89Q8VY\npCxi+XZOCVwUVNCGiALMt7GhuMIhsgyNq1YPJDEmHkvU1P0mndr55EWq72jEBa36\nEjxpLuNymBSutM8ChElGQdwdm+bDTdFaRoz3bTkCgYEA6xZGZ/Y5Eh3Gwq5kWfCq\nSOmKiUOlHLLkDzFfYwnhzpB93RtS3zZHJcY5qQbNN4TMHm0V9c00J9aiwZTBLe8T\np9OALdUkqwnQApFb7mpnQKMicDGoh2VIu0yiIlhQQIVFKsjpvUkxkiYlqMQCZOi1\nrSoKRhEZGpLKbuT4oqP6Cgw=\n-----END PRIVATE KEY-----\n",
+  "client_email": "hariprasad@sodium-chalice-434615-f6.iam.gserviceaccount.com",
+  "client_id": "110880829513504730255",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/hariprasad%40sodium-chalice-434615-f6.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
